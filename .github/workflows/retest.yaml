@@ -2,12 +2,17 @@ name: Rerun Action on PR Comment
 on:
   issue_comment:
     types: [created]
+  
+  permissions:
+    contents: read
 
 jobs:
   rerun-action:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: write
+      actions: write
     steps:
       - name: Check if PR comment contains trigger phrase
         id: check_comment
