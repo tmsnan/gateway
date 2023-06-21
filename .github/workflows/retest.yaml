@@ -34,7 +34,7 @@ jobs:
         if: steps.check_comment.outputs.result == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_PAT }}
           script: |
             const { Octokit } = require("@octokit/core");
             const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
