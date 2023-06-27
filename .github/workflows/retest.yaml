@@ -41,5 +41,5 @@ jobs:
               owner,
               repo,
               workflow_id: workflowId,
-              ref: `refs/pull/${number}/head`
+              ref: main
             });
