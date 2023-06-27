@@ -28,8 +28,9 @@ jobs:
       - name: Rerun Action
         if: steps.check_comment.outputs.result == 'true'
         uses: actions/github-script@v6
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { Octokit } = require("@octokit/core");
             const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -40,5 +41,5 @@ jobs:
               owner,
               repo,
               workflow_id: workflowId,
-              ref: `pull/${number}/merge`
+              ref: `refs/pull/${number}/head`
             });
