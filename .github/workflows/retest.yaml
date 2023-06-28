@@ -41,5 +41,5 @@ jobs:
               owner,
               repo,
               workflow_id: workflowId,
-              ref: main
+              ref: `pull/${number}/merge`
             });
