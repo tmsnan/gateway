@@ -21,7 +21,9 @@ jobs:
             console.log(`Comment: ${comment}`);
             console.log(`Contains Trigger: ${containsTrigger}`);
             return containsTrigger;
-
+      - uses: actions/checkout@v3
+        with:
+          ref: refs/pull/${{ github.event.number }}/head
       - name: Install @octokit/core
         run: npm install @octokit/core@^3
 
@@ -41,5 +43,5 @@ jobs:
               owner,
               repo,
               workflow_id: workflowId,
-              ref: `pull/${number}/merge`
+              ref: refs/pull/${{ github.event.number }}/head
             });
