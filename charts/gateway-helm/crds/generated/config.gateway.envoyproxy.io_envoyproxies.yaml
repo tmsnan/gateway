@@ -3960,6 +3960,24 @@ spec:
                           - type
                           type: object
                         type: array
+                      statsMatcher:
+                        properties:
+                          inclusionPrefix:
+                            description: Proxy stats name prefix matcher for inclusion.
+                            items:
+                              type: string
+                            type: array
+                          inclusionRegexps:
+                            description: Proxy stats name regexps matcher for inclusion.
+                            items:
+                              type: string
+                            type: array
+                          inclusionSuffixes:
+                            description: Proxy stats name suffix matcher for inclusion.
+                            items:
+                              type: string
+                            type: array
+                        type: object
                     type: object
                   tracing:
                     description: Tracing defines tracing configuration for managed

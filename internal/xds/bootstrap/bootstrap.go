@@ -36,6 +36,8 @@ const (
 	envoyReadinessAddress = "0.0.0.0"
 	EnvoyReadinessPort    = 19001
 	EnvoyReadinessPath    = "/ready"
+	// required stats are used by readiness checks.
+	RequiredEnvoyStatsMatcherInclusionPrefixes = "cluster_manager,listener_manager,server,cluster.xds-grpc"
 )
 
 //go:embed bootstrap.yaml.tpl
@@ -63,6 +65,27 @@ type bootstrapParameters struct {
 	EnablePrometheus bool
 	// OtelMetricSinks defines the configuration of the OpenTelemetry sinks.
 	OtelMetricSinks []metricSink
+	// Proxy stats matcher defines configuration for reporting custom Envoy stats.
+	// To reduce memory and CPU overhead from Envoy stats system, Gateway proxies by
+	// default create and expose only a subset of Envoy stats. This option is to
+	// control creation of additional Envoy stats with prefix, suffix, and regex
+	// expressions match on the name of the stats.
+	// you can specify stats matcher as follows:
+	// ```yaml
+	// proxyStatsMatcher:
+	//
+	//	inclusionRegexps:
+	//	  - .*outlier_detection.*
+	//	  - .*upstream_rq_retry.*
+	//	  - .*upstream_cx_.*
+	//	inclusionSuffixes:
+	//	  - upstream_rq_timeout
+	//
+	// ```
+	// Note including more Envoy stats might increase number of time series
+	// collected by prometheus significantly. Care needs to be taken on Prometheus
+	// resource provision and configuration to reduce cardinality.
+	ProxyStatsMatcher ProxyStatsMatcherParameters
 }
 
 type xdsServerParameters struct {
@@ -97,6 +120,15 @@ type readyServerParameters struct {
 	ReadinessPath string
 }
 
+type ProxyStatsMatcherParameters struct {
+	// Proxy stats name prefix matcher for inclusion.
+	InclusionPrefixs []string
+	// Proxy stats name suffix matcher for inclusion.
+	InclusionSuffixs []string
+	// Proxy stats name regexps matcher for inclusion.
+	InclusionRegexps []string
+}
+
 // render the stringified bootstrap config in yaml format.
 func (b *bootstrapConfig) render() error {
 	buf := new(strings.Builder)
@@ -111,8 +143,9 @@ func (b *bootstrapConfig) render() error {
 // GetRenderedBootstrapConfig renders the bootstrap YAML string
 func GetRenderedBootstrapConfig(proxyMetrics *egcfgv1a1.ProxyMetrics) (string, error) {
 	var (
-		enablePrometheus bool
-		metricSinks      []metricSink
+		enablePrometheus  bool
+		metricSinks       []metricSink
+		ProxyStatsMatcher ProxyStatsMatcherParameters
 	)
 
 	if proxyMetrics != nil {
@@ -138,7 +171,17 @@ func GetRenderedBootstrapConfig(proxyMetrics *egcfgv1a1.ProxyMetrics) (string, e
 				Port:    sink.OpenTelemetry.Port,
 			})
 		}
+
+		if proxyMetrics.ProxyStatsMatcher != nil {
+			ProxyStatsMatcher = ProxyStatsMatcherParameters{
+				InclusionPrefixs: proxyMetrics.ProxyStatsMatcher.InclusionPrefixs,
+				InclusionSuffixs: proxyMetrics.ProxyStatsMatcher.InclusionSuffixs,
+				InclusionRegexps: proxyMetrics.ProxyStatsMatcher.InclusionRegexps,
+			}
+		}
 	}
+	ProxyStatsMatcher.InclusionPrefixs = append(ProxyStatsMatcher.InclusionPrefixs, strings.Split(RequiredEnvoyStatsMatcherInclusionPrefixes, ",")...)
+	//ProxyStatsMatcher.InclusionRegexps = append(ProxyStatsMatcher.InclusionRegexps, strings.Split(RequiredEnvoyStatsMatcherInclusionRegexes, ",")...)
 
 	cfg := &bootstrapConfig{
 		parameters: bootstrapParameters{
@@ -156,8 +199,9 @@ func GetRenderedBootstrapConfig(proxyMetrics *egcfgv1a1.ProxyMetrics) (string, e
 				Port:          EnvoyReadinessPort,
 				ReadinessPath: EnvoyReadinessPath,
 			},
-			EnablePrometheus: enablePrometheus,
-			OtelMetricSinks:  metricSinks,
+			EnablePrometheus:  enablePrometheus,
+			OtelMetricSinks:   metricSinks,
+			ProxyStatsMatcher: ProxyStatsMatcher,
 		},
 	}
 

@@ -44,6 +44,17 @@ func TestGetRenderedBootstrapConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "custom-stats-matcher",
+			proxyMetrics: &egcfgv1a1.ProxyMetrics{
+				ProxyStatsMatcher: &egcfgv1a1.StatsMatcher{
+					InclusionPrefixs: []string{"listener", "cluster"},
+					InclusionSuffixs: []string{"upstream_rq"},
+					InclusionRegexps: []string{".*\\d{3}$"},
+				},
+				Prometheus: &egcfgv1a1.PrometheusProvider{},
+			},
+		},
 	}
 
 	for _, tc := range cases {

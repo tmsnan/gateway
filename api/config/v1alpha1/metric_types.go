@@ -9,7 +9,8 @@ type ProxyMetrics struct {
 	// Prometheus defines the configuration for Admin endpoint `/stats/prometheus`.
 	Prometheus *PrometheusProvider `json:"prometheus,omitempty"`
 	// Sinks defines the metric sinks where metrics are sent to.
-	Sinks []MetricSink `json:"sinks,omitempty"`
+	Sinks             []MetricSink  `json:"sinks,omitempty"`
+	ProxyStatsMatcher *StatsMatcher `json:"statsMatcher,omitempty"`
 }
 
 type MetricSinkType string
@@ -27,6 +28,15 @@ type MetricSink struct {
 	// OpenTelemetry defines the configuration for OpenTelemetry sink.
 	// It's required if the sink type is OpenTelemetry.
 	OpenTelemetry *OpenTelemetrySink `json:"openTelemetry,omitempty"`
+}
+
+type StatsMatcher struct {
+	// Proxy stats name prefix matcher for inclusion.
+	InclusionPrefixs []string `json:"inclusionPrefixs,omitempty"`
+	// Proxy stats name suffix matcher for inclusion.
+	InclusionSuffixs []string `json:"inclusionSuffixs,omitempty"`
+	// Proxy stats name regexps matcher for inclusion.
+	InclusionRegexps []string `json:"inclusionRegexps,omitempty"`
 }
 
 type OpenTelemetrySink struct {

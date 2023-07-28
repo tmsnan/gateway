@@ -24,6 +24,14 @@ spec:
           openTelemetry:
             host: otel-collector.monitoring.svc.cluster.local
             port: 4317
+      statsMatcher:
+        inclusionPrefix:
+          - "cluster"
+          - "listener"
+        inclusionSuffixes:
+          - "upstream_rq"
+        inclusionRegexps:
+          - ".x"
     accessLog:
       settings:
         - format:
