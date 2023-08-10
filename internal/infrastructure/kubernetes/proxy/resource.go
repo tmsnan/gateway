@@ -194,6 +194,40 @@ func expectedProxyContainers(infra *ir.ProxyInfra, deploymentConfig *egcfgv1a1.K
 	return containers, nil
 }
 
+func expectedInitContainers() ([]corev1.Container, error) {
+
+	containers := []corev1.Container{
+		{
+			Name:                     envoyContainerName,
+			Image:                    *deploymentConfig.Container.Image,
+			ImagePullPolicy:          corev1.PullIfNotPresent,
+			Command:                  []string{"envoy"},
+			Args:                     args,
+			Env:                      expectedProxyContainerEnv(deploymentConfig),
+			Resources:                *deploymentConfig.Container.Resources,
+			SecurityContext:          deploymentConfig.Container.SecurityContext,
+			Ports:                    ports,
+			VolumeMounts:             expectedContainerVolumeMounts(deploymentConfig),
+			TerminationMessagePolicy: corev1.TerminationMessageReadFile,
+			TerminationMessagePath:   "/dev/termination-log",
+			ReadinessProbe: &corev1.Probe{
+				ProbeHandler: corev1.ProbeHandler{
+					HTTPGet: &corev1.HTTPGetAction{
+						Path:   bootstrap.EnvoyReadinessPath,
+						Port:   intstr.IntOrString{Type: intstr.Int, IntVal: bootstrap.EnvoyReadinessPort},
+						Scheme: corev1.URISchemeHTTP,
+					},
+				},
+				TimeoutSeconds:   1,
+				PeriodSeconds:    10,
+				SuccessThreshold: 1,
+				FailureThreshold: 3,
+			},
+		},
+	}
+	return nil, nil
+}
+
 func componentLogLevel(levels map[egcfgv1a1.LogComponent]egcfgv1a1.LogLevel, component egcfgv1a1.LogComponent, defaultLevel egcfgv1a1.LogLevel) egcfgv1a1.LogLevel {
 	if level, ok := levels[component]; ok {
 		return level

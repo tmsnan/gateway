@@ -228,6 +228,12 @@ func (r *ResourceRender) Deployment() (*appsv1.Deployment, error) {
 			ProgressDeadlineSeconds: pointer.Int32(600),
 		},
 	}
+	if r.infra.Config.Spec.EnableCoreDump {
+		initcontainers, err := expectedInitContainers()
+		if err != nil {
+			deployment.Spec.Template.Spec.InitContainers = initcontainers
+		}
+	}
 
 	return deployment, nil
 }
