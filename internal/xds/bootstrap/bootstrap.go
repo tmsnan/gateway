@@ -36,6 +36,9 @@ const (
 	envoyReadinessAddress = "0.0.0.0"
 	EnvoyReadinessPort    = 19001
 	EnvoyReadinessPath    = "/ready"
+
+	// https://www.envoyproxy.io/docs/envoy/latest/configuration/operations/overload_manager/overload_manager#limiting-active-connections
+	GlobalDownstreamConnectionLimit = 10000
 )
 
 //go:embed bootstrap.yaml.tpl
@@ -68,6 +71,9 @@ type bootstrapParameters struct {
 	// StatsMatcher is to control creation of custom Envoy stats with prefix,
 	// suffix, and regex expressions match on the name of the stats.
 	StatsMatcher *StatsMatcherParameters
+
+	// OverloadManager defines the configuration of the Envoy overload manager.
+	OverloadManager overloadManager
 }
 
 type xdsServerParameters struct {
@@ -106,6 +112,11 @@ type StatsMatcherParameters struct {
 	Prefixs            []string
 	Suffixs            []string
 	RegularExpressions []string
+}
+
+type overloadManager struct {
+	// GlobalDownstreamConnectionLimit is the global connection limit for all downstream connections.
+	GlobalDownstreamConnectionLimit int32
 }
 
 // render the stringified bootstrap config in yaml format.
@@ -186,6 +197,9 @@ func GetRenderedBootstrapConfig(proxyMetrics *egv1a1.ProxyMetrics) (string, erro
 			},
 			EnablePrometheus: enablePrometheus,
 			OtelMetricSinks:  metricSinks,
+			OverloadManager: overloadManager{
+				GlobalDownstreamConnectionLimit: GlobalDownstreamConnectionLimit,
+			},
 		},
 	}
 	if proxyMetrics != nil && proxyMetrics.Matches != nil {

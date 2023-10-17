@@ -175,3 +175,9 @@ layered_runtime:
         ads: {}
         resource_api_version: V3
       name: runtime-0
+overload_manager:
+  resource_monitors:
+  - name: "envoy.resource_monitors.global_downstream_max_connections"
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.resource_monitors.downstream_connections.v3.DownstreamConnectionsConfig
+      max_active_downstream_connections: {{ .OverloadManager.GlobalDownstreamConnectionLimit }}
