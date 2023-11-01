@@ -55,6 +55,10 @@ type BackendTrafficPolicySpec struct {
 	// the backend endpoints
 	// +optional
 	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+
+	// RetryStrategy defines the retry strategy to be applied.
+
+	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty"`
 }
 
 // BackendTrafficPolicyStatus defines the state of BackendTrafficPolicy

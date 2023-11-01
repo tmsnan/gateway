@@ -241,6 +241,7 @@ func (t *Translator) translateBackendTrafficPolicyForRoute(policy *egv1a1.Backen
 	var (
 		rl *ir.RateLimit
 		lb *ir.LoadBalancer
+		rs *ir.RetryStrategy
 	)
 
 	// Build IR
@@ -249,6 +250,9 @@ func (t *Translator) translateBackendTrafficPolicyForRoute(policy *egv1a1.Backen
 	}
 	if policy.Spec.LoadBalancer != nil {
 		lb = t.buildLoadBalancer(policy)
+	}
+	if policy.Spec.RetryStrategy != nil {
+		rs = t.buildRetryStrategy(policy)
 	}
 
 	// Apply IR to all relevant routes
@@ -260,6 +264,7 @@ func (t *Translator) translateBackendTrafficPolicyForRoute(policy *egv1a1.Backen
 				if strings.HasPrefix(r.Name, prefix) {
 					r.RateLimit = rl
 					r.LoadBalancer = lb
+					r.RetryStrategy = rs
 				}
 			}
 		}
@@ -271,6 +276,7 @@ func (t *Translator) translateBackendTrafficPolicyForGateway(policy *egv1a1.Back
 	var (
 		rl *ir.RateLimit
 		lb *ir.LoadBalancer
+		rs *ir.RetryStrategy
 	)
 
 	// Build IR
@@ -279,6 +285,9 @@ func (t *Translator) translateBackendTrafficPolicyForGateway(policy *egv1a1.Back
 	}
 	if policy.Spec.LoadBalancer != nil {
 		lb = t.buildLoadBalancer(policy)
+	}
+	if policy.Spec.RetryStrategy != nil {
+		rs = t.buildRetryStrategy(policy)
 	}
 	// Apply IR to all the routes within the specific Gateway
 	// If the feature is already set, then skip it, since it must be have
@@ -295,6 +304,9 @@ func (t *Translator) translateBackendTrafficPolicyForGateway(policy *egv1a1.Back
 			}
 			if r.LoadBalancer == nil {
 				r.LoadBalancer = lb
+			}
+			if r.RetryStrategy == nil {
+				r.RetryStrategy = rs
 			}
 		}
 	}
@@ -436,4 +448,9 @@ func (t *Translator) buildLoadBalancer(policy *egv1a1.BackendTrafficPolicy) *ir.
 	}
 
 	return lb
+}
+
+func (t *Translator) buildRetryStrategy(policy *egv1a1.BackendTrafficPolicy) *ir.RetryStrategy {
+	var rs *ir.RetryStrategy
+	return rs
 }

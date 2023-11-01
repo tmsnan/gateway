@@ -78,6 +78,11 @@ func buildXdsCluster(args *xdsClusterArgs) *clusterv3.Cluster {
 		cluster.LbPolicy = clusterv3.Cluster_MAGLEV
 	}
 
+	if args.retryStrategy != nil && args.retryStrategy.RetryBudget != nil {
+
+		cluster.CircuitBreakers = &clusterv3.CircuitBreakers{}
+	}
+
 	return cluster
 }
 

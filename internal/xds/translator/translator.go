@@ -212,12 +212,13 @@ func (t *Translator) processHTTPListenerXdsTranslation(tCtx *types.ResourceVersi
 
 			if httpRoute.Destination != nil {
 				if err := addXdsCluster(tCtx, &xdsClusterArgs{
-					name:         httpRoute.Destination.Name,
-					settings:     httpRoute.Destination.Settings,
-					tSocket:      nil,
-					protocol:     protocol,
-					endpointType: Static,
-					loadBalancer: httpRoute.LoadBalancer,
+					name:          httpRoute.Destination.Name,
+					settings:      httpRoute.Destination.Settings,
+					tSocket:       nil,
+					protocol:      protocol,
+					endpointType:  Static,
+					loadBalancer:  httpRoute.LoadBalancer,
+					retryStrategy: httpRoute.RetryStrategy,
 				}); err != nil && !errors.Is(err, ErrXdsClusterExists) {
 					return err
 				}
@@ -439,12 +440,13 @@ func addXdsCluster(tCtx *types.ResourceVersionTable, args *xdsClusterArgs) error
 }
 
 type xdsClusterArgs struct {
-	name         string
-	settings     []*ir.DestinationSetting
-	tSocket      *corev3.TransportSocket
-	protocol     ProtocolType
-	endpointType EndpointType
-	loadBalancer *ir.LoadBalancer
+	name          string
+	settings      []*ir.DestinationSetting
+	tSocket       *corev3.TransportSocket
+	protocol      ProtocolType
+	endpointType  EndpointType
+	loadBalancer  *ir.LoadBalancer
+	retryStrategy *ir.RetryStrategy
 }
 
 type ProtocolType int

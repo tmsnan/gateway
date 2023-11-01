@@ -276,6 +276,9 @@ type HTTPRoute struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	// load balancer policy to use when routing to the backend endpoints.
 	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty" yaml:"loadBalancer,omitempty"`
+
+	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty" yaml:"retryStrategy,omitempty"`
+
 	// CORS policy for the route.
 	CORS *CORS `json:"cors,omitempty" yaml:"cors,omitempty"`
 	// JWT defines the schema for authenticating HTTP requests using JSON Web Tokens (JWT).
@@ -1016,4 +1019,11 @@ type Random struct{}
 type ConsistentHash struct {
 	// Hash based on the Source IP Address
 	SourceIP *bool `json:"sourceIP,omitempty" yaml:"sourceIP,omitempty"`
+}
+
+type RetryStrategy struct {
+	RetryBudget *RetryBudget `json:"retryBudget,omitempty" yaml:"retryBudget,omitempty"`
+}
+
+type RetryBudget struct {
 }
